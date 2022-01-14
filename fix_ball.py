@@ -2,7 +2,7 @@ from vpython import *
 scene = canvas(width = 600, height =600, align = 'left', background = vec(102, 167, 223)/255)#,forward=vec(0,1,0))
 g_AM = graph(title='Angular Momentum', width=450, height=300,align = 'right', background=vec(0.5,0.5,0),
                xtitle="<i>t</i>(s)", ytitle="<i>I</i> (kg m<sup>2</sup>)")
-L_L = 2 
+L_L = 4
 L_W = 2
 L_H = 8
 
@@ -24,7 +24,7 @@ for i in (-1,0,1):
 
 class fix_balls():
     
-    def __init__(self,num):
+    def __init__(self,num, _L_L = L_L,_L_H = L_H,_L_W = L_W, _S_L = S_L,_S_H=S_H,_S_W = S_W):
         self.elements_num = num
         self.elements = []
         self.my_index = []
@@ -32,29 +32,37 @@ class fix_balls():
         self._v = []
         self._pos = []
 
+        self.L_L = _L_L
+        self.L_H = _L_H
+        self.L_W = _L_W
+
+        self.S_L = _S_L
+        self.S_H = _S_H
+        self.S_W = _S_W
+
         LongSide = []
         LongSide_a = []
         LongSide_v = []
         LongSide_pos = []
         L_index = []
         #element 1, long side 
-        for i in range(L_L):
+        for i in range(_L_L):
             side_y = []
             side_y_a = []
             side_y_v = []
             side_y_pos = []
-            for j in range(L_H):
+            for j in range(_L_H):
                 side_z = []
                 side_z_a = []
                 side_z_v = []
                 side_z_pos = []
 
-                for k in range(L_W):
-                    side_z.append(sphere(pos = vec(i*a,(j-L_H/2)*a,k*a), radius = size, color = color.blue))
-                    side_z[-1].opos=vec(i*a,(j-L_H/2)*a,k*a)
+                for k in range(_L_W):
+                    side_z.append(sphere(pos = vec(i*a,(j-_L_H/2)*a,k*a), radius = size, color = color.blue))
+                    side_z[-1].opos=vec(i*a,(j-_L_H/2)*a,k*a)
                     side_z_a.append(vec(0,0,0))
                     side_z_v.append(vec(0,0,0))
-                    side_z_pos.append(vec(i*a,(j-L_H/2)*a,k*a))
+                    side_z_pos.append(vec(i*a,(j-_L_H/2)*a,k*a))
 
                     L_index.append((i,j,k))
 
@@ -83,23 +91,23 @@ class fix_balls():
             ShortSide_v = []
             ShortSide_pos = []
 
-            for i in range(S_L):
+            for i in range(_S_L):
                 side_y = []
                 side_y_a = []
                 side_y_v = []
                 side_y_pos = []
-                for j in range(S_H):
+                for j in range(_S_H):
                     side_z = []
                     side_z_a = []
                     side_z_v = []
                     side_z_pos = []
 
-                    for k in range(S_W):
-                        side_z.append(sphere(pos = vec(-(i+1)*a,(j-S_H/2)*a,k*a), radius = size, color = color.blue))
-                        side_z[-1].opos=vec(-(i+1)*a,(j-S_H/2)*a,k*a)
+                    for k in range(_S_W):
+                        side_z.append(sphere(pos = vec(-(i+1)*a,(j-_S_H/2)*a,k*a), radius = size, color = color.blue))
+                        side_z[-1].opos=vec(-(i+1)*a,(j-_S_H/2)*a,k*a)
                         side_z_a.append(vec(0,0,0))
                         side_z_v.append(vec(0,0,0))
-                        side_z_pos.append(vec(-(i+1)*a,(j-S_H/2)*a,k*a))
+                        side_z_pos.append(vec(-(i+1)*a,(j-_S_H/2)*a,k*a))
                         S_index.append((i,j,k))
                     side_y.append(side_z)
                     side_y_a.append(side_z_a)
@@ -115,7 +123,9 @@ class fix_balls():
             self._v.append(ShortSide_v)
             self._pos.append(ShortSide_pos)
             self.my_index.append(S_index)
-
+        self.ball_num = (_L_L*_L_H*_L_W)
+        if self.elements_num>1:
+            self.ball_num += (_S_L*_S_H*_S_W)
         self.set_CM()
         self.set_init_v()
         self.set_init_arr()
@@ -124,41 +134,42 @@ class fix_balls():
 
     def set_CM(self):
         C_M_pos = vec(0,0,0)
-        ball_num = (L_L*L_H*L_W)
-        if self.elements_num>1:
-            ball_num += (S_L*S_H*S_W)
+        
         for num in range(self.elements_num):
             for (i,j,k) in self.my_index[num]:
-                C_M_pos += self._pos[num][i][j][k]/ball_num 
+                C_M_pos += self._pos[num][i][j][k]/self.ball_num 
         self._CM = C_M_pos
 
     def set_init_v(self,velocity = 100):
         
         perturbation = vec((random()+1e-3)/100,0,0)
-        self._v[0][0][0][0] = velocity*cross(self._CM-self._pos[0][0][0][0],vec(-1,0,0)) + perturbation
-        self._v[0][1][0][0] = velocity*cross(self._CM-self._pos[0][1][0][0],vec(-1,0,0))
-        self._v[0][0][L_H-1][1] = velocity*cross(self._CM-self._pos[0][0][L_H-1][1],vec(-1,0,0))
-        self._v[0][1][L_H-1][1] = velocity*cross(self._CM-self._pos[0][1][L_H-1][1],vec(-1,0,0)) - perturbation
+        for x in range(self.L_L):
+            self._v[0][x][0][0] = velocity*cross(self._CM-self._pos[0][0][0][0],vec(-1,0,0)) + perturbation
+            self._v[0][x][-1][1] = velocity*cross(self._CM-self._pos[0][0][-1][1],vec(-1,0,0)) - perturbation
         print("perturbation =",perturbation)
 
     def set_init_arr(self):
         self.arr_list = []
         '''init rotating axis'''
-        init_arr = arrow(pos = self._CM-vec(1,0,0) , axis = vec(-S_L-2,0,0), color=color.green,shaftwidth = 0.1)
+        init_arr = arrow(pos = self._CM , axis = vec(-self.S_L-2,0,0), color=color.green,shaftwidth = 0.1)
 
         '''counting C.M. , three orthogonal axis'''
         self.myaxis = []
-        R_axis3 =  (self._pos[0][0][L_H-1][0]+self._pos[0][L_L-1][L_H-1][L_W-1])/2 - (self._pos[0][0][0][0]+self._pos[0][L_L-1][0][L_W-1])/2
-        R_axis2 =  (self._pos[1][S_L-1][0][0]+self._pos[1][S_L-1][S_H-1][S_W-1])/2 - (self._pos[1][0][0][0]+self._pos[1][0][S_H-1][S_W-1])/2
-        R_axis1 = norm(cross(R_axis2,R_axis3))
+        if self.elements_num>1:
+            R_axis3 =  (self._pos[0][0][-1][0]+self._pos[0][-1][-1][-1])/2 - (self._pos[0][0][0][0]+self._pos[0][-1][0][-1])/2
+            R_axis2 =  (self._pos[1][-1][0][0]+self._pos[1][-1][-1][-1])/2 - (self._pos[1][0][0][0]+self._pos[1][0][-1][-1])/2
+            R_axis1 = norm(cross(R_axis2,R_axis3))
+        else:
+            R_axis3 =  (self._pos[0][0][-1][0]+self._pos[0][-1][-1][-1])/2 - (self._pos[0][0][0][0]+self._pos[0][-1][0][-1])/2
+            R_axis2 =  (self._pos[0][-1][0][0]+self._pos[0][-1][-1][-1])/2 - (self._pos[0][0][0][0]+self._pos[0][0][-1][-1])/2
+            R_axis1 = norm(cross(R_axis2,R_axis3))
+        self.myaxis.append(R_axis1/2)
+        self.myaxis.append(R_axis2/2)
+        self.myaxis.append(R_axis3/2)
 
-        self.myaxis.append(R_axis1)
-        self.myaxis.append(R_axis2)
-        self.myaxis.append(R_axis3)
-
-        axis1_arr = arrow(pos = self._CM , axis = R_axis1, color=color.red,shaftwidth = 0.1)
-        axis2_arr = arrow(pos = self._CM , axis = R_axis2, color=color.blue,shaftwidth = 0.1)
-        axis3_arr = arrow(pos = self._CM , axis = R_axis3, color=color.yellow,shaftwidth = 0.1)
+        axis1_arr = arrow(pos = self._CM , axis = R_axis1/2, color=color.red,shaftwidth = 0.1)
+        axis2_arr = arrow(pos = self._CM , axis = R_axis2/2, color=color.blue,shaftwidth = 0.1)
+        axis3_arr = arrow(pos = self._CM , axis = R_axis3/2, color=color.yellow,shaftwidth = 0.1)
 
         self.arr_list.append(init_arr)
         self.arr_list.append(axis1_arr)
@@ -171,13 +182,17 @@ class fix_balls():
 
     def set_arr(self):
         
-        R_axis3 =  (self._pos[0][0][L_H-1][0]+self._pos[0][L_L-1][L_H-1][L_W-1])/2 - (self._pos[0][0][0][0]+self._pos[0][L_L-1][0][L_W-1])/2
-        R_axis2 =  (self._pos[1][S_L-1][0][0]+self._pos[1][S_L-1][S_H-1][S_W-1])/2 - (self._pos[1][0][0][0]+self._pos[1][0][S_H-1][S_W-1])/2
-        R_axis1 = norm(cross(R_axis2,R_axis3))
-
-        self.myaxis[0] = R_axis1
-        self.myaxis[1] = R_axis2
-        self.myaxis[2] = R_axis3
+        if self.elements_num>1:
+            R_axis3 =  (self._pos[0][0][-1][0]+self._pos[0][-1][-1][-1])/2 - (self._pos[0][0][0][0]+self._pos[0][-1][0][-1])/2
+            R_axis2 =  (self._pos[1][-1][0][0]+self._pos[1][-1][-1][-1])/2 - (self._pos[1][0][0][0]+self._pos[1][0][-1][-1])/2
+            R_axis1 = norm(cross(R_axis2,R_axis3))
+        else:
+            R_axis3 =  (self._pos[0][0][-1][0]+self._pos[0][-1][-1][-1])/2 - (self._pos[0][0][0][0]+self._pos[0][-1][0][-1])/2
+            R_axis2 =  (self._pos[0][-1][0][0]+self._pos[0][-1][-1][-1])/2 - (self._pos[0][0][0][0]+self._pos[0][0][-1][-1])/2
+            R_axis1 = norm(cross(R_axis2,R_axis3))
+        self.myaxis[0] = R_axis1/2
+        self.myaxis[1] = R_axis2/2
+        self.myaxis[2] = R_axis3/2
         for i in range(3):
             self.arr_list[i+1].pos = self._CM
             self.arr_list[i+1].axis = self.myaxis[i]
@@ -213,7 +228,7 @@ class fix_balls():
                 L_AM += cross(r-r.dot(rotation_axis)*rotation_axis,p-p.dot(rotation_axis)*rotation_axis)
         return L_AM
 
-    def time_elapse(self,dt):
+    def time_elapse(self,dt,t):
         for num in range(self.elements_num):
             for (i, j, k) in self.my_index[num]:
                 self._a[num][i][j][k] = vec(0,0,0)
@@ -222,41 +237,43 @@ class fix_balls():
                     if (ni,nj,nk) not in self.my_index[num]:continue
                     natural_L = mag(self.elements[num][i][j][k].opos-self.elements[num][ni][nj][nk].opos)
                     self._a[num][i][j][k] += -K/m*(mag(self._pos[num][i][j][k]-self._pos[num][ni][nj][nk])-natural_L*a)*norm(self._pos[num][i][j][k]-self._pos[num][ni][nj][nk])
-        num1 = 0
-        num2 = 1
-        for (i1, j1, k1) in self.my_index[num1]:
-            for (i2,j2,k2) in self.my_index[num2]:
-                o_distance = mag(self.elements[num2][i2][j2][k2].opos-self.elements[num1][i1][j1][k1].opos)
-                if  (o_distance>0.99*a and o_distance <1.01*a) or (o_distance>1.41*a and o_distance <1.415*a):
-                    # print("hi",t)
-                    self._a[num1][i1][j1][k1] += -K/m*(mag(self._pos[num1][i1][j1][k1]-self._pos[num2][i2][j2][k2])-o_distance*a)*norm(self._pos[num1][i1][j1][k1]-self._pos[num2][i2][j2][k2])
-                    self._a[num2][i2][j2][k2] += K/m*(mag(self._pos[num1][i1][j1][k1]-self._pos[num2][i2][j2][k2])-o_distance*a)*norm(self._pos[num1][i1][j1][k1]-self._pos[num2][i2][j2][k2])
+        if self.elements_num>1:
+            num1, num2= 0 ,1
+            for (i1, j1, k1) in self.my_index[num1]:
+                for (i2,j2,k2) in self.my_index[num2]:
+                    o_distance = mag(self.elements[num2][i2][j2][k2].opos-self.elements[num1][i1][j1][k1].opos)
+                    if  (o_distance>0.99*a and o_distance <1.01*a) or (o_distance>1.41*a and o_distance <1.415*a):
+                        # print("hi",t)
+                        self._a[num1][i1][j1][k1] += -K/m*(mag(self._pos[num1][i1][j1][k1]-self._pos[num2][i2][j2][k2])-o_distance*a)*norm(self._pos[num1][i1][j1][k1]-self._pos[num2][i2][j2][k2])
+                        self._a[num2][i2][j2][k2] += K/m*(mag(self._pos[num1][i1][j1][k1]-self._pos[num2][i2][j2][k2])-o_distance*a)*norm(self._pos[num1][i1][j1][k1]-self._pos[num2][i2][j2][k2])
         for num in range(self.elements_num):
             for (i, j, k) in self.my_index[num]:
                 self._v[num][i][j][k] += self._a[num][i][j][k]*dt
                 self._pos[num][i][j][k] += self._v[num][i][j][k]*dt
         self.set_CM()
+        self.set_arr()
+        self.count_period(t)
 
-    def count_period(self,t):
-        if(t<0.01):
+    def count_period(self,_t):
+        if(_t<0.01):
             self.now_I = 10
             self.prev_I = self.now_I
             self.prev_t = 0
-
-        if self.now_I*self.prev_I<0 and abs(t-self.prev_t) >= 1e-2 and t>0.5:
-            print("Period : {:.5f} sec".format(2*(t-self.prev_t)))
-            self.prev_t = t
+        self.now_I = self.myaxis[2].hat.dot(self.cal_L(self.myaxis[2],self._CM))
+        if self.now_I*self.prev_I<0 and abs(_t-self.prev_t) >= 1e-2 and _t>0.5:
+            print("Period : {:.5f} sec".format(2*(_t-self.prev_t)))
+            self.prev_t = _t
 
     def scene_move(self):
         for num in range(self.elements_num):
             for (i, j, k) in self.my_index[num]:
-                self.elements[num][i][j][k].pos = self._pos[num][i][j][k] 
-        self.set_arr()
+                self.elements[num][i][j][k].pos = self._pos[num][i][j][k]       
+
 
 
 
 if __name__ == '__main__':
-    T_shape = fix_balls(2) 
+    T_shape = fix_balls(1) 
 
     dt = 5e-5
     t=0
@@ -268,8 +285,7 @@ if __name__ == '__main__':
         rate(5000)
         t+=dt
         times += 1
-        T_shape.time_elapse(dt)
-
+        T_shape.time_elapse(dt,t)
         if(times%50==0):
             T_shape.scene_move()
         if(times%1000==0):
