@@ -131,7 +131,6 @@ class fix_balls():
             for (i,j,k) in self.my_index[num]:
                 C_M_pos += self._pos[num][i][j][k]/ball_num 
         self._CM = C_M_pos
-        #print(self._CM)
 
     def set_init_v(self,velocity = 100):
         
@@ -253,21 +252,25 @@ class fix_balls():
             for (i, j, k) in self.my_index[num]:
                 self.elements[num][i][j][k].pos = self._pos[num][i][j][k] 
         self.set_arr()
-T_shape = fix_balls(2) 
 
-dt = 5e-5
-t=0
-prev_t = 0
-times = 0  #polt graph per 1000 times 
 
-print("K =",K)
-while t<50:
-     rate(5000)
-     t+=dt
-     times += 1
-     T_shape.time_elapse(dt)
 
-     if(times%50==0):
-         T_shape.scene_move()
-     if(times%1000==0):
-         T_shape.polt_graph(t)
+if __name__ == '__main__':
+    T_shape = fix_balls(2) 
+
+    dt = 5e-5
+    t=0
+    prev_t = 0
+    times = 0  #polt graph per 1000 times 
+
+    print("K =",K)
+    while t<50:
+        rate(5000)
+        t+=dt
+        times += 1
+        T_shape.time_elapse(dt)
+
+        if(times%50==0):
+            T_shape.scene_move()
+        if(times%1000==0):
+            T_shape.polt_graph(t)
