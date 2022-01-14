@@ -177,6 +177,7 @@ print("Moment of Inertia axis3 :",cal_I(R_axis3,C_M_pos))
 dt = 5e-5
 t=0
 prev_t = 0
+prev_I = 10
 times = 0  #polt graph per 1000 times 
 p_A1.plot(pos=(t,R_axis1.hat.dot(cal_L(R_axis1,C_M_pos))))
 p_A2.plot(pos=(t,R_axis2.hat.dot(cal_L(R_axis2,C_M_pos))))
