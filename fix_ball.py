@@ -193,9 +193,7 @@ class fix_balls():
         self.myaxis[0] = R_axis1/2
         self.myaxis[1] = R_axis2/2
         self.myaxis[2] = R_axis3/2
-        for i in range(3):
-            self.arr_list[i+1].pos = self._CM
-            self.arr_list[i+1].axis = self.myaxis[i]
+
 
     def curve_set(self,graph_):
         self._curve = []
@@ -268,7 +266,9 @@ class fix_balls():
         for num in range(self.elements_num):
             for (i, j, k) in self.my_index[num]:
                 self.elements[num][i][j][k].pos = self._pos[num][i][j][k]       
-
+        for i in range(3):
+            self.arr_list[i+1].pos = self._CM
+            self.arr_list[i+1].axis = self.myaxis[i]
 
 
 
