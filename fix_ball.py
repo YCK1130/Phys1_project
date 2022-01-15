@@ -259,11 +259,11 @@ class fix_balls():
             self.now_I = 10
             self.prev_I = self.now_I
             self.prev_t = 0
-        self.now_I = self.myaxis[2].hat.dot(self.cal_L(self.myaxis[2],self._CM))
+        self.now_I = self.myaxis[1].hat.dot(self.cal_L(self.myaxis[1],self._CM))
         if self.now_I*self.prev_I<0 and abs(_t-self.prev_t) >= 1e-2 and _t>0.5:
-            print("Period : {:.5f} sec".format(2*(_t-self.prev_t)))
+            print("Period : {:.5f} sec @ {:.5f} , axis: {:}".format(2*(_t-self.prev_t),_t,self.myaxis[1].hat))
             self.prev_t = _t
-
+        self.prev_I = self.now_I
     def scene_move(self):
         for num in range(self.elements_num):
             for (i, j, k) in self.my_index[num]:
