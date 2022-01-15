@@ -23,7 +23,7 @@ for i in (-1,0,1):
             neighbor.append((i,j,k))
 
 class fix_balls():
-    
+    '''1 for rectangle, 2 for T shape'''
     def __init__(self,num, _L_L = L_L,_L_H = L_H,_L_W = L_W, _S_L = S_L,_S_H=S_H,_S_W = S_W):
         self.elements_num = num
         self.elements = []
@@ -141,7 +141,7 @@ class fix_balls():
         self._CM = C_M_pos
 
     def set_init_v(self,velocity = 100):
-        
+        '''set init velocity with a small perturbation'''
         perturbation = vec((random()+1e-3)/100,0,0)
         for x in range(self.L_L):
             self._v[0][x][0][0] = velocity*cross(self._CM-self._pos[0][0][0][0],vec(-1,0,0)) + perturbation
@@ -153,7 +153,7 @@ class fix_balls():
         '''init rotating axis'''
         init_arr = arrow(pos = self._CM , axis = vec(-self.S_L-2,0,0), color=color.green,shaftwidth = 0.1)
 
-        '''counting C.M. , three orthogonal axis'''
+        '''three orthogonal axis'''
         self.myaxis = []
         if self.elements_num>1:
             R_axis3 =  (self._pos[0][0][-1][0]+self._pos[0][-1][-1][-1])/2 - (self._pos[0][0][0][0]+self._pos[0][-1][0][-1])/2
@@ -273,6 +273,7 @@ class fix_balls():
 
 
 if __name__ == '__main__':
+    '''1 for rectangle, 2 for T shape'''
     T_shape = fix_balls(1) 
 
     dt = 5e-5
