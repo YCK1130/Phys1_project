@@ -24,7 +24,7 @@ for i in (-1,0,1):
 
 class fix_balls():
     '''1 for rectangle, 2 for T shape'''
-    def __init__(self,num, _L_L = L_L,_L_H = L_H,_L_W = L_W, _S_L = S_L,_S_H=S_H,_S_W = S_W):
+    def __init__(self,num, _L_L = L_L,_L_H = L_H,_L_W = L_W, _S_L = S_L,_S_H=S_H,_S_W = S_W, size=size):
         self.elements_num = num
         self.elements = []
         self.my_index = []
@@ -163,13 +163,13 @@ class fix_balls():
             R_axis3 =  (self._pos[0][0][-1][0]+self._pos[0][-1][-1][-1])/2 - (self._pos[0][0][0][0]+self._pos[0][-1][0][-1])/2
             R_axis2 =  (self._pos[0][-1][0][0]+self._pos[0][-1][-1][-1])/2 - (self._pos[0][0][0][0]+self._pos[0][0][-1][-1])/2
             R_axis1 = norm(cross(R_axis2,R_axis3))
-        self.myaxis.append(R_axis1/2)
-        self.myaxis.append(R_axis2/2)
-        self.myaxis.append(R_axis3/2)
+        self.myaxis.append(R_axis1.hat*self.L_W/2)
+        self.myaxis.append(R_axis2.hat*self.L_L/2)
+        self.myaxis.append(R_axis3.hat*self.L_H/2)
 
-        axis1_arr = arrow(pos = self._CM , axis = R_axis1/2, color=color.red,shaftwidth = 0.1)
-        axis2_arr = arrow(pos = self._CM , axis = R_axis2/2, color=color.blue,shaftwidth = 0.1)
-        axis3_arr = arrow(pos = self._CM , axis = R_axis3/2, color=color.yellow,shaftwidth = 0.1)
+        axis1_arr = arrow(pos = self._CM , axis = R_axis1.hat*self.L_W/2, color=color.red,shaftwidth = 0.1)
+        axis2_arr = arrow(pos = self._CM , axis = R_axis2.hat*self.L_L/2, color=color.blue,shaftwidth = 0.1)
+        axis3_arr = arrow(pos = self._CM , axis = R_axis3.hat*self.L_H/2, color=color.yellow,shaftwidth = 0.1)
 
         self.arr_list.append(init_arr)
         self.arr_list.append(axis1_arr)
@@ -190,9 +190,9 @@ class fix_balls():
             R_axis3 =  (self._pos[0][0][-1][0]+self._pos[0][-1][-1][-1])/2 - (self._pos[0][0][0][0]+self._pos[0][-1][0][-1])/2
             R_axis2 =  (self._pos[0][-1][0][0]+self._pos[0][-1][-1][-1])/2 - (self._pos[0][0][0][0]+self._pos[0][0][-1][-1])/2
             R_axis1 = norm(cross(R_axis2,R_axis3))
-        self.myaxis[0] = R_axis1/2
-        self.myaxis[1] = R_axis2/2
-        self.myaxis[2] = R_axis3/2
+        self.myaxis[0] = R_axis1.hat*self.L_W/2
+        self.myaxis[1] = R_axis2.hat*self.L_L/2
+        self.myaxis[2] = R_axis3.hat*self.L_H/2
 
 
     def curve_set(self,graph_):

@@ -63,12 +63,3 @@ def collision(a1, a2):
     v2prime = a2.v - 2 * a1.m/(a1.m+a2.m) *(a2.pos-a1.pos) * dot (a2.v-a1.v, a2.pos-a1.pos) / mag(a2.pos-a1.pos)**2
     return v1prime, v2prime
 
-class group_diatom:
-    def __init__(self,N,CM_pos,CM_v,L,type_keyword):
-        self.molecules = []
-        for i in range(N):
-            # rand_pos = vec(random()-0.5, random()-0.5, random()-0.5)*L + CM_pos
-            # rand_v = 
-            # atom = diatomic_molecule()
-            # self.molecules.append()
-            pass
