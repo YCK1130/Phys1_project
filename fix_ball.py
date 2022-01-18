@@ -224,14 +224,16 @@ class fix_balls():
         p_A1 = gcurve(color = color.red,width = 4,graph=graph_)
         p_A2 = gcurve(color = color.blue,width = 4,graph=graph_)
         p_A3 = gcurve(color = color.yellow,width = 4,graph=graph_)
+        p_init = gcurve(color = color.green,width = 4,graph=graph_)
         self._curve.append(p_A1)
         self._curve.append(p_A2)
         self._curve.append(p_A3)
+        self._curve.append(p_init)
 
     def plot_graph(self,t):
         for i in range(3):
             self._curve[i].plot(pos=(t,self.myaxis[i].hat.dot(self.cal_L(self.myaxis[i],self._CM))))
-
+        self._curve[3].plot(pos=(t,self.arr_list[0].axis.hat.dot(self.cal_L(self.arr_list[0].axis.hat,self._CM))))
     def cal_I(self,rotation_axis,ref_point):
         Moment_of_Inertia = 0
         for num in range(self.elements_num):
@@ -307,7 +309,7 @@ class fix_balls():
 
 if __name__ == '__main__':
     '''1 for rectangle, 2 for T shape'''
-    T_shape = fix_balls(1,_L_W=3,hollow=True) 
+    T_shape = fix_balls(1)#,_L_W=3,hollow=True) 
 
     dt = 5e-5
     t=0
