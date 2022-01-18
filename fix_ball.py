@@ -14,6 +14,7 @@ size = 1e-3
 m = 1e-2 #1e-2
 K = 1e6 #1e6
 a = 1
+b_coef = 1
 neighbor = [] 
 #sqrt(2)#上下左右
 for i in (-2,-1,0,1,2):
@@ -67,7 +68,7 @@ class fix_balls():
                         side_z_pos.append(None)
                         continue
                     if hollow:
-                        side_z.append(sphere(pos = vec(i*self.unit,(j-_L_H/2)*self.unit,k*self.unit), radius = size, color = color.blue,opacity=0.4))
+                        side_z.append(sphere(pos = vec(i*self.unit,(j-_L_H/2)*self.unit,k*self.unit), radius = size, color = color.blue,opacity=0.1))
                     else:
                         side_z.append(sphere(pos = vec(i*self.unit,(j-_L_H/2)*self.unit,k*self.unit), radius = size, color = color.blue))
                     side_z[-1].opos=vec(i*self.unit,(j-_L_H/2)*self.unit,k*self.unit)
@@ -121,7 +122,7 @@ class fix_balls():
                             side_z_pos.append(None)
                             continue
                         if hollow:
-                            side_z.append(sphere(pos = vec(-(i+1)*self.unit,(j-_S_H/2)*self.unit,k*self.unit), radius = size, color = color.blue,opacity=0.4))    
+                            side_z.append(sphere(pos = vec(-(i+1)*self.unit,(j-_S_H/2)*self.unit,k*self.unit), radius = size, color = color.blue,opacity=0.1))    
                         else:
                             side_z.append(sphere(pos = vec(-(i+1)*self.unit,(j-_S_H/2)*self.unit,k*self.unit), radius = size, color = color.blue))
                         side_z[-1].m = m
@@ -270,6 +271,7 @@ class fix_balls():
                         self._a[num2][i2][j2][k2] += K/m*(mag(self._pos[num1][i1][j1][k1]-self._pos[num2][i2][j2][k2])-o_distance)*norm(self._pos[num1][i1][j1][k1]-self._pos[num2][i2][j2][k2])
         for num in range(self.elements_num):
             for (i, j, k) in self.my_index[num]:
+                # self._a[num][i][j][k] += -b_coef*self._v[num][i][j][k]
                 self._v[num][i][j][k] += self._a[num][i][j][k]*dt
                 self._pos[num][i][j][k] += self._v[num][i][j][k]*dt
         self.set_CM()
@@ -295,6 +297,12 @@ class fix_balls():
             self.arr_list[i+1].pos = self._CM
             self.arr_list[i+1].axis = self.myaxis[i]
 
+    def total_K(self):
+        _K_ = 0
+        for num in range(self.elements_num):
+            for (i,j,k) in self.my_index[num]:
+                _K_ += 1/2*self.elements[0][0][0][0].m*mag2(self._v[num][i][j][k])
+        return _K_
 
 
 if __name__ == '__main__':

@@ -47,6 +47,8 @@ class diatomic_molecule:
         return 1/2*self.A1.m*mag2(O_re_v_T)+1/2*self.A2.m*mag2(C_re_v_T)
     def com_K(self): #return kinetic energy of the translational motion of the center of mass
         return 1/2*(self.A1.m+self.A2.m)*mag2(self.com_v())
+    def total_K(self):
+        return 1/2*(self.A1.m*mag2(self.A1.v)+self.A2.m*mag2(self.A2.v))
     def check_collide(self,another):
         '''if collide, change two atoms' velocity '''
         if(mag(self.A1.pos-another.A1.pos)<another.A1.radius*2) and dot(self.A1.v-another.A1.v,self.A1.pos-another.A1.pos)<0:
