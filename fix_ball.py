@@ -17,15 +17,15 @@ a = 1
 b_coef = 1
 neighbor = [] 
 #sqrt(2)#上下左右
-for i in (-2,-1,0,1,2):
-    for j in (-2,-1,0,1,2):
-        for k in (-2,-1,0,1,2):
+for i in (-1,0,1):
+    for j in (-1,0,1):
+        for k in (-1,0,1):
             if sqrt(i**2+j**2+k**2)>1.42 or sqrt(i**2+j**2+k**2)<0.99:continue 
             neighbor.append((i,j,k))
 
 class fix_balls():
     '''1 for rectangle, 2 for T shape'''
-    def __init__(self,num, unit = a,_L_L = L_L,_L_H = L_H,_L_W = L_W,
+    def __init__(self,num, unit = 1,_L_L = L_L,_L_H = L_H,_L_W = L_W,
      _S_L = S_L,_S_H=S_H,_S_W = S_W,size=size,hollow = False):
         self.elements_num = num
         self.elements = []
@@ -67,10 +67,10 @@ class fix_balls():
                         side_z_v.append(None)
                         side_z_pos.append(None)
                         continue
+
+                    side_z.append(sphere(pos = vec(i*self.unit,(j-_L_H/2)*self.unit,k*self.unit), radius = size, color = color.blue))
                     if hollow:
-                        side_z.append(sphere(pos = vec(i*self.unit,(j-_L_H/2)*self.unit,k*self.unit), radius = size, color = color.blue,opacity=0.1))
-                    else:
-                        side_z.append(sphere(pos = vec(i*self.unit,(j-_L_H/2)*self.unit,k*self.unit), radius = size, color = color.blue))
+                        side_z[-1].opacity=0.1 
                     side_z[-1].opos=vec(i*self.unit,(j-_L_H/2)*self.unit,k*self.unit)
                     side_z[-1].m = m
                     side_z_a.append(vec(0,0,0))
@@ -121,10 +121,9 @@ class fix_balls():
                             side_z_v.append(None)
                             side_z_pos.append(None)
                             continue
+                        side_z.append(sphere(pos = vec(-(i+1)*self.unit,(j-_S_H/2)*self.unit,k*self.unit), radius = size, color = color.blue))
                         if hollow:
-                            side_z.append(sphere(pos = vec(-(i+1)*self.unit,(j-_S_H/2)*self.unit,k*self.unit), radius = size, color = color.blue,opacity=0.1))    
-                        else:
-                            side_z.append(sphere(pos = vec(-(i+1)*self.unit,(j-_S_H/2)*self.unit,k*self.unit), radius = size, color = color.blue))
+                            side_z[-1].opacity=0.1    
                         side_z[-1].m = m
                         side_z[-1].opos=vec(-(i+1)*self.unit,(j-_S_H/2)*self.unit,k*self.unit)
                         side_z_a.append(vec(0,0,0))
@@ -234,6 +233,7 @@ class fix_balls():
         for i in range(3):
             self._curve[i].plot(pos=(t,self.myaxis[i].hat.dot(self.cal_L(self.myaxis[i],self._CM))))
         self._curve[3].plot(pos=(t,self.arr_list[0].axis.hat.dot(self.cal_L(self.arr_list[0].axis.hat,self._CM))))
+    
     def cal_I(self,rotation_axis,ref_point):
         Moment_of_Inertia = 0
         for num in range(self.elements_num):
