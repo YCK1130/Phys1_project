@@ -1,15 +1,15 @@
 from vpython import *
 
-size,  k_bond = 31E-12,  18600.0 # These numbers are all made up
-m_o, m_c,m_n,m_h =16.0/6E23, 12.0/6E23, 14.0/6E23, 1.0/6E23 
+size,  k_bond = 5e-3/2,  18600.0 # These numbers are all made up
+m_o, m_c,m_n,m_h =16E-3/6E23, 12E-3/6E23, 14E-3/6E23, 1E-3/6E23 
 mass_dict = {"CO" : (m_o,m_c), "O2":(m_o,m_o), "N2" : (m_n,m_n),"H2":(m_h,m_h)}
 d = 2.5*size
 dt = 1E-16
 class diatomic_molecule:
-    def __init__(self, pos, axis = d*vec(random(),random(),random()), type_keyword = "O2"):
-        self.A1 = sphere(pos = pos, radius = size, color = color.red)
-        self.A2 = sphere(pos = pos+axis, radius = size, color = color.blue)
-        self.bond = cylinder(pos = pos, axis = axis, radius = size/2.0, color = color.white)
+    def __init__(self, pos,size=size, axis = d*vec(1,0,0), type_keyword = "O2"):
+        self.A1 = sphere(pos = pos, radius = size, color = vec(255,215,0)/255)
+        self.A2 = sphere(pos = pos+axis, radius = size, color = vec(162,205,90)/255)
+        self.bond = cylinder(pos = pos, axis = axis, radius = size/3.0, color = color.white)
         self.A1.m = mass_dict[type_keyword][0]
         self.A2.m = mass_dict[type_keyword][1]
         self.A1.v = vector(0, 0, 0)

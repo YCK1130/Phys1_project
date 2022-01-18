@@ -1,7 +1,7 @@
 from vpython import *
 scene = canvas(width = 600, height =600, align = 'left', background = vec(102, 167, 223)/255)#,forward=vec(0,1,0))
 g_AM = graph(title='Angular Momentum', width=450, height=300,align = 'right', background=vec(0.5,0.5,0),
-               xtitle="<i>t</i>(s)", ytitle="<i>I</i> (kg m<sup>2</sup>)")
+               xtitle="<i>t</i>(s)", ytitle="I (kg m<sup>2</sup>)")
 L_L = 4
 L_W = 2
 L_H = 8
@@ -11,23 +11,25 @@ S_W = 2
 S_H = 2
 
 size = 2e-1
-m = 1e-2
-K = 1e6
+m = 1e-2 #1e-2
+K = 1e6 #1e6
 a = 1
 neighbor = [] 
 #sqrt(2)#上下左右
-for i in (-1,0,1):
-    for j in (-1,0,1):
-        for k in (-1,0,1):
+for i in (-2,-1,0,1,2):
+    for j in (-2,-1,0,1,2):
+        for k in (-2,-1,0,1,2):
             if sqrt(i**2+j**2+k**2)>1.42 or sqrt(i**2+j**2+k**2)<0.99:continue 
             neighbor.append((i,j,k))
 
 class fix_balls():
     '''1 for rectangle, 2 for T shape'''
-    def __init__(self,num, _L_L = L_L,_L_H = L_H,_L_W = L_W, _S_L = S_L,_S_H=S_H,_S_W = S_W, size=size):
+    def __init__(self,num, unit = a,_L_L = L_L,_L_H = L_H,_L_W = L_W,
+     _S_L = S_L,_S_H=S_H,_S_W = S_W,size=size,hollow = False):
         self.elements_num = num
         self.elements = []
         self.my_index = []
+        self.unit = unit
         self._a = []
         self._v = []
         self._pos = []
@@ -58,12 +60,20 @@ class fix_balls():
                 side_z_pos = []
 
                 for k in range(_L_W):
-                    side_z.append(sphere(pos = vec(i*a,(j-_L_H/2)*a,k*a), radius = size, color = color.blue))
-                    side_z[-1].opos=vec(i*a,(j-_L_H/2)*a,k*a)
+                    if hollow and (i not in (0,_L_L-1) and j not in (0,_L_H-1) and k not in (0,_L_W-1)):
+                        side_z.append(None)
+                        side_z_a.append(None)
+                        side_z_v.append(None)
+                        side_z_pos.append(None)
+                        continue
+                    if hollow:
+                        side_z.append(sphere(pos = vec(i*self.unit,(j-_L_H/2)*self.unit,k*self.unit), radius = size, color = color.blue,opacity=0.4))
+                    else:
+                        side_z.append(sphere(pos = vec(i*self.unit,(j-_L_H/2)*self.unit,k*self.unit), radius = size, color = color.blue))
+                    side_z[-1].opos=vec(i*self.unit,(j-_L_H/2)*self.unit,k*self.unit)
                     side_z_a.append(vec(0,0,0))
                     side_z_v.append(vec(0,0,0))
-                    side_z_pos.append(vec(i*a,(j-_L_H/2)*a,k*a))
-
+                    side_z_pos.append(vec(i*self.unit,(j-_L_H/2)*self.unit,k*self.unit))
                     L_index.append((i,j,k))
 
                 side_y.append(side_z)
@@ -103,11 +113,20 @@ class fix_balls():
                     side_z_pos = []
 
                     for k in range(_S_W):
-                        side_z.append(sphere(pos = vec(-(i+1)*a,(j-_S_H/2)*a,k*a), radius = size, color = color.blue))
-                        side_z[-1].opos=vec(-(i+1)*a,(j-_S_H/2)*a,k*a)
+                        if hollow and (i not in (0,_S_L-1) and j not in (0,_S_H-1) and k not in (0,_S_W-1)):
+                            side_z.append(None)
+                            side_z_a.append(None)
+                            side_z_v.append(None)
+                            side_z_pos.append(None)
+                            continue
+                        if hollow:
+                            side_z.append(sphere(pos = vec(-(i+1)*self.unit,(j-_S_H/2)*self.unit,k*self.unit), radius = size, color = color.blue,opacity=0.4))    
+                        else:
+                            side_z.append(sphere(pos = vec(-(i+1)*self.unit,(j-_S_H/2)*self.unit,k*self.unit), radius = size, color = color.blue))
+                        side_z[-1].opos=vec(-(i+1)*self.unit,(j-_S_H/2)*self.unit,k*self.unit)
                         side_z_a.append(vec(0,0,0))
                         side_z_v.append(vec(0,0,0))
-                        side_z_pos.append(vec(-(i+1)*a,(j-_S_H/2)*a,k*a))
+                        side_z_pos.append(vec(-(i+1)*self.unit,(j-_S_H/2)*self.unit,k*self.unit))
                         S_index.append((i,j,k))
                     side_y.append(side_z)
                     side_y_a.append(side_z_a)
@@ -123,14 +142,17 @@ class fix_balls():
             self._v.append(ShortSide_v)
             self._pos.append(ShortSide_pos)
             self.my_index.append(S_index)
-        self.ball_num = (_L_L*_L_H*_L_W)
-        if self.elements_num>1:
-            self.ball_num += (_S_L*_S_H*_S_W)
+        if hollow:
+            self.ball_num = _L_L*_L_H*2+_L_H*_L_W*2+_L_L*_L_W*2 - _L_H*4 - _L_L*4 - _L_W*4 + 8
+        else:
+            self.ball_num = (_L_L*_L_H*_L_W)
+            if self.elements_num>1:
+                self.ball_num += (_S_L*_S_H*_S_W)
         self.set_CM()
         self.set_init_v()
         self.set_init_arr()
         self.curve_set(g_AM)
-        self.polt_graph(0)
+        self.plot_graph(0)
 
     def set_CM(self):
         C_M_pos = vec(0,0,0)
@@ -145,13 +167,13 @@ class fix_balls():
         perturbation = vec((random()+1e-3)/100,0,0)
         for x in range(self.L_L):
             self._v[0][x][0][0] = velocity*cross(self._CM-self._pos[0][0][0][0],vec(-1,0,0)) + perturbation
-            self._v[0][x][-1][1] = velocity*cross(self._CM-self._pos[0][0][-1][1],vec(-1,0,0)) - perturbation
+            self._v[0][x][-1][-1] = velocity*cross(self._CM-self._pos[0][-1][-1][-1],vec(-1,0,0)) - perturbation
         print("perturbation =",perturbation)
 
     def set_init_arr(self):
         self.arr_list = []
         '''init rotating axis'''
-        init_arr = arrow(pos = self._CM , axis = vec(-self.S_L-2,0,0), color=color.green,shaftwidth = 0.1)
+        init_arr = arrow(pos = self._CM , axis = vec(-self.S_L-2,0,0)*self.unit, color=color.green,shaftwidth = 0.1*self.unit)
 
         '''three orthogonal axis'''
         self.myaxis = []
@@ -163,13 +185,13 @@ class fix_balls():
             R_axis3 =  (self._pos[0][0][-1][0]+self._pos[0][-1][-1][-1])/2 - (self._pos[0][0][0][0]+self._pos[0][-1][0][-1])/2
             R_axis2 =  (self._pos[0][-1][0][0]+self._pos[0][-1][-1][-1])/2 - (self._pos[0][0][0][0]+self._pos[0][0][-1][-1])/2
             R_axis1 = norm(cross(R_axis2,R_axis3))
-        self.myaxis.append(R_axis1.hat*self.L_W/2)
-        self.myaxis.append(R_axis2.hat*self.L_L/2)
-        self.myaxis.append(R_axis3.hat*self.L_H/2)
+        self.myaxis.append(R_axis1.hat*self.L_W*self.unit/2)
+        self.myaxis.append(R_axis2.hat*self.L_L*self.unit/2)
+        self.myaxis.append(R_axis3.hat*self.L_H*self.unit/2)
 
-        axis1_arr = arrow(pos = self._CM , axis = R_axis1.hat*self.L_W/2, color=color.red,shaftwidth = 0.1)
-        axis2_arr = arrow(pos = self._CM , axis = R_axis2.hat*self.L_L/2, color=color.blue,shaftwidth = 0.1)
-        axis3_arr = arrow(pos = self._CM , axis = R_axis3.hat*self.L_H/2, color=color.yellow,shaftwidth = 0.1)
+        axis1_arr = arrow(pos = self._CM , axis = R_axis1.hat*self.L_W*self.unit/2, color=color.red,shaftwidth = 0.1*self.unit)
+        axis2_arr = arrow(pos = self._CM , axis = R_axis2.hat*self.L_L*self.unit/2, color=color.blue,shaftwidth = 0.1*self.unit)
+        axis3_arr = arrow(pos = self._CM , axis = R_axis3.hat*self.L_H*self.unit/2, color=color.yellow,shaftwidth = 0.1*self.unit)
 
         self.arr_list.append(init_arr)
         self.arr_list.append(axis1_arr)
@@ -190,10 +212,9 @@ class fix_balls():
             R_axis3 =  (self._pos[0][0][-1][0]+self._pos[0][-1][-1][-1])/2 - (self._pos[0][0][0][0]+self._pos[0][-1][0][-1])/2
             R_axis2 =  (self._pos[0][-1][0][0]+self._pos[0][-1][-1][-1])/2 - (self._pos[0][0][0][0]+self._pos[0][0][-1][-1])/2
             R_axis1 = norm(cross(R_axis2,R_axis3))
-        self.myaxis[0] = R_axis1.hat*self.L_W/2
-        self.myaxis[1] = R_axis2.hat*self.L_L/2
-        self.myaxis[2] = R_axis3.hat*self.L_H/2
-
+        self.myaxis[0] = R_axis1.hat*self.L_W*self.unit/2
+        self.myaxis[1] = R_axis2.hat*self.L_L*self.unit/2
+        self.myaxis[2] = R_axis3.hat*self.L_H*self.unit/2
 
     def curve_set(self,graph_):
         self._curve = []
@@ -204,7 +225,7 @@ class fix_balls():
         self._curve.append(p_A2)
         self._curve.append(p_A3)
 
-    def polt_graph(self,t):
+    def plot_graph(self,t):
         for i in range(3):
             self._curve[i].plot(pos=(t,self.myaxis[i].hat.dot(self.cal_L(self.myaxis[i],self._CM))))
 
@@ -223,6 +244,7 @@ class fix_balls():
             for (i,j,k) in self.my_index[num]:
                 r = self._pos[num][i][j][k]-ref_point
                 p = m*self._v[num][i][j][k]
+                #print(i,j,k,r,p)
                 L_AM += cross(r-r.dot(rotation_axis)*rotation_axis,p-p.dot(rotation_axis)*rotation_axis)
         return L_AM
 
@@ -234,16 +256,16 @@ class fix_balls():
                     ni, nj, nk= i+delta[0],j+delta[1],k+delta[2]
                     if (ni,nj,nk) not in self.my_index[num]:continue
                     natural_L = mag(self.elements[num][i][j][k].opos-self.elements[num][ni][nj][nk].opos)
-                    self._a[num][i][j][k] += -K/m*(mag(self._pos[num][i][j][k]-self._pos[num][ni][nj][nk])-natural_L*a)*norm(self._pos[num][i][j][k]-self._pos[num][ni][nj][nk])
+                    self._a[num][i][j][k] += -K/m*(mag(self._pos[num][i][j][k]-self._pos[num][ni][nj][nk])-natural_L)*norm(self._pos[num][i][j][k]-self._pos[num][ni][nj][nk])
         if self.elements_num>1:
             num1, num2= 0 ,1
             for (i1, j1, k1) in self.my_index[num1]:
                 for (i2,j2,k2) in self.my_index[num2]:
                     o_distance = mag(self.elements[num2][i2][j2][k2].opos-self.elements[num1][i1][j1][k1].opos)
-                    if  (o_distance>0.99*a and o_distance <1.01*a) or (o_distance>1.41*a and o_distance <1.415*a):
+                    if  (o_distance>0.99*self.unit and o_distance <1.01*self.unit) or (o_distance>1.41*self.unit and o_distance <1.415*self.unit):
                         # print("hi",t)
-                        self._a[num1][i1][j1][k1] += -K/m*(mag(self._pos[num1][i1][j1][k1]-self._pos[num2][i2][j2][k2])-o_distance*a)*norm(self._pos[num1][i1][j1][k1]-self._pos[num2][i2][j2][k2])
-                        self._a[num2][i2][j2][k2] += K/m*(mag(self._pos[num1][i1][j1][k1]-self._pos[num2][i2][j2][k2])-o_distance*a)*norm(self._pos[num1][i1][j1][k1]-self._pos[num2][i2][j2][k2])
+                        self._a[num1][i1][j1][k1] += -K/m*(mag(self._pos[num1][i1][j1][k1]-self._pos[num2][i2][j2][k2])-o_distance)*norm(self._pos[num1][i1][j1][k1]-self._pos[num2][i2][j2][k2])
+                        self._a[num2][i2][j2][k2] += K/m*(mag(self._pos[num1][i1][j1][k1]-self._pos[num2][i2][j2][k2])-o_distance)*norm(self._pos[num1][i1][j1][k1]-self._pos[num2][i2][j2][k2])
         for num in range(self.elements_num):
             for (i, j, k) in self.my_index[num]:
                 self._v[num][i][j][k] += self._a[num][i][j][k]*dt
@@ -262,6 +284,7 @@ class fix_balls():
             print("Period : {:.5f} sec @ {:.5f} , axis: {:}".format(2*(_t-self.prev_t),_t,self.myaxis[1].hat))
             self.prev_t = _t
         self.prev_I = self.now_I
+
     def scene_move(self):
         for num in range(self.elements_num):
             for (i, j, k) in self.my_index[num]:
@@ -274,12 +297,12 @@ class fix_balls():
 
 if __name__ == '__main__':
     '''1 for rectangle, 2 for T shape'''
-    T_shape = fix_balls(1) 
+    T_shape = fix_balls(1,_L_W=3,hollow=True) 
 
     dt = 5e-5
     t=0
     prev_t = 0
-    times = 0  #polt graph per 1000 times 
+    times = 0  #plot graph per 1000 times 
 
     print("K =",K)
     while t<50:
@@ -287,7 +310,7 @@ if __name__ == '__main__':
         t+=dt
         times += 1
         T_shape.time_elapse(dt,t)
-        if(times%50==0):
-            T_shape.scene_move()
-        if(times%1000==0):
-            T_shape.polt_graph(t)
+        
+        T_shape.scene_move()
+        if(times%100==0):
+            T_shape.plot_graph(t)
