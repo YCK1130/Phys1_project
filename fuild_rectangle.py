@@ -6,7 +6,7 @@ g_K = graph(title='kinetic energy', width=450, height=300,align = 'right', backg
                xtitle="<i>t</i>(s)", ytitle="K")
 p_K_gas = gcurve(color = color.red,width = 4,graph=g_K)
 p_K_box = gcurve(color = color.blue,width = 4,graph=g_K)
-N = 2 # 20 molecules
+N = 10 # 20 molecules
 L = ((24.4E-3)*20)**(1/3.0)/40 *2 # 2L is the length of the cubic container box, the number is made up
 H = 10*L/8
 W = 6*L/8
@@ -26,10 +26,10 @@ class group_diatom:
         _CM_Pos = vec(0,0,0)
         for i in range(_N):
             rand_pos = vec((random()-0.5)*L, (random()-0.5)*H, (random()-0.5)*W)
-            rand_axis = d*vec(random(),random(),random()).hat
+            rand_axis = d*vec.random().hat
             atom = diatomic_molecule(pos = rand_pos,axis = rand_axis,type_keyword=_type_keyword)
-            atom.A1.v = initial_v*vec(random(), random(), random())
-            atom.A2.v = initial_v*vec(random(), random(), random())
+            atom.A1.v = initial_v*vec.random().hat
+            atom.A2.v = initial_v*vec.random().hat
             _CM_p += atom.A1.v*atom.A1.m + atom.A2.v*atom.A2.m
             _CM_Pos += atom.com()*(atom.A1.m + atom.A2.m)
             self.molecules.append(atom)
@@ -66,6 +66,7 @@ times = 0  #polt graph per 1000 times
 K_energy = 0
 for _atom_ in gas.molecules:
     K_energy += _atom_.total_K()
+print(K_energy,container_ball.total_K())
 p_K_gas.plot(pos=(t,K_energy))
 p_K_box.plot(pos=(t,container_ball.total_K()))
 # print("K =",K)
@@ -76,34 +77,48 @@ while t<50:
     gas.check_collide()
 
     # box_cm = container_ball._CM
+    box_mass = container_ball.ball_num*container_ball.elements[0][0][0][0].m
     for _atom_ in gas.molecules:
         for (i,j,k) in container_ball.my_index[0]:
             if(mag(_atom_.A1.pos-container_ball._pos[0][i][j][k])<(container_ball.elements[0][i][j][k].radius + _atom_.A1.radius)) and dot(_atom_.A1.v-container_ball._v[0][i][j][k],_atom_.A1.pos-container_ball._pos[0][i][j][k])<0:
-                v1prime = - 2 * container_ball.elements[0][i][j][k].m/(_atom_.A1.m+container_ball.elements[0][i][j][k].m) *(_atom_.A1.pos-container_ball._pos[0][i][j][k]) * dot (_atom_.A1.v-container_ball._v[0][i][j][k], _atom_.A1.pos-container_ball._pos[0][i][j][k]) / mag(_atom_.A1.pos-container_ball._pos[0][i][j][k])**2
-                v2prime = - 2 * _atom_.A1.m/(_atom_.A1.m+container_ball.elements[0][i][j][k].m) *(container_ball._pos[0][i][j][k]-_atom_.A1.pos) * dot (container_ball._v[0][i][j][k]-_atom_.A1.v, container_ball._pos[0][i][j][k]-_atom_.A1.pos) / mag(container_ball._pos[0][i][j][k]-_atom_.A1.pos)**2
+                v1prime = - 2 * box_mass/(_atom_.A1.m+box_mass) *(_atom_.A1.pos-container_ball._pos[0][i][j][k]) * dot (_atom_.A1.v-container_ball._v[0][i][j][k], _atom_.A1.pos-container_ball._pos[0][i][j][k]) / mag2(_atom_.A1.pos-container_ball._pos[0][i][j][k])
+                # v2prime = - 2 * _atom_.A1.m/(_atom_.A1.m+box_mass) *(container_ball._pos[0][i][j][k]-_atom_.A1.pos) * dot (container_ball._v[0][i][j][k]-_atom_.A1.v, container_ball._pos[0][i][j][k]-_atom_.A1.pos) / mag2(container_ball._pos[0][i][j][k]-_atom_.A1.pos)
+                # v2prime = -v1prime*_atom_.A1.m/box_mass
+                p2prime = -v1prime*_atom_.A1.m
                 _atom_.A1.v += v1prime
                 # _atom_.A1.v , container_ball._v[0][i][j][k] = v1prime,v2prime
                 
-                r_axis = cross(container_ball._pos[0][i][j][k]-container_ball._CM,v2prime.hat)
+                r_CM = container_ball._pos[0][i][j][k]-container_ball._CM # position vec with respect to CM
+                p_on_r_CM = proj(p2prime,r_CM)
+                p_T_r_CM = p2prime - p_on_r_CM
+
+                r_axis = cross(r_CM,p2prime.hat)
                 I_axis = container_ball.cal_I(r_axis,container_ball._CM)
-                w_axis = cross(container_ball._pos[0][i][j][k]-container_ball._CM,v2prime*container_ball.elements[0][i][j][k].m)/I_axis
+                
+                w_axis = cross(r_CM,p2prime)/I_axis
                 for (ni,nj,nk) in container_ball.my_index[0]:
-                    container_ball._v[0][ni][nj][nk] += cross(w_axis,container_ball._pos[0][ni][nj][nk]-container_ball._CM)
+                    container_ball._v[0][ni][nj][nk] += cross(w_axis,container_ball._pos[0][ni][nj][nk]-container_ball._CM) + p_on_r_CM/box_mass
 
             
             
             
             if(mag(_atom_.A2.pos-container_ball._pos[0][i][j][k])<(container_ball.elements[0][i][j][k].radius + _atom_.A2.radius)) and dot(_atom_.A2.v-container_ball._v[0][i][j][k],_atom_.A2.pos-container_ball._pos[0][i][j][k])<0:
-                v1prime = - 2 * container_ball.elements[0][i][j][k].m/(_atom_.A2.m+container_ball.elements[0][i][j][k].m) *(_atom_.A2.pos-container_ball._pos[0][i][j][k]) * dot (_atom_.A2.v-container_ball._v[0][i][j][k], _atom_.A2.pos-container_ball._pos[0][i][j][k]) / mag(_atom_.A2.pos-container_ball._pos[0][i][j][k])**2
-                v2prime = - 2 * _atom_.A2.m/(_atom_.A2.m+container_ball.elements[0][i][j][k].m) *(container_ball._pos[0][i][j][k]-_atom_.A2.pos) * dot (container_ball._v[0][i][j][k]-_atom_.A2.v, container_ball._pos[0][i][j][k]-_atom_.A2.pos) / mag(container_ball._pos[0][i][j][k]-_atom_.A2.pos)**2
+                v1prime = - 2 * box_mass/(_atom_.A2.m+box_mass) *(_atom_.A2.pos-container_ball._pos[0][i][j][k]) * dot (_atom_.A2.v-container_ball._v[0][i][j][k], _atom_.A2.pos-container_ball._pos[0][i][j][k]) / mag(_atom_.A2.pos-container_ball._pos[0][i][j][k])**2
+                # v2prime = - 2 * _atom_.A2.m/(_atom_.A2.m+container_ball.elements[0][i][j][k].m) *(container_ball._pos[0][i][j][k]-_atom_.A2.pos) * dot (container_ball._v[0][i][j][k]-_atom_.A2.v, container_ball._pos[0][i][j][k]-_atom_.A2.pos) / mag(container_ball._pos[0][i][j][k]-_atom_.A2.pos)**2
+                p2prime = -v1prime*_atom_.A2.m
                 _atom_.A2.v += v1prime
                 # _atom_.A2.v , container_ball._v[0][i][j][k] = v1prime,v2prime
                 
-                r_axis = cross(container_ball._pos[0][i][j][k]-container_ball._CM,v2prime.hat)
+                r_CM = container_ball._pos[0][i][j][k]-container_ball._CM # position vec with respect to CM
+                p_on_r_CM = proj(p2prime,r_CM)
+                p_T_r_CM = p2prime - p_on_r_CM
+
+                r_axis = cross(r_CM,p2prime.hat)
                 I_axis = container_ball.cal_I(r_axis,container_ball._CM)
-                w_axis = cross(container_ball._pos[0][i][j][k]-container_ball._CM,v2prime*container_ball.elements[0][i][j][k].m)/I_axis
+                
+                w_axis = cross(r_CM,p2prime)/I_axis
                 for (ni,nj,nk) in container_ball.my_index[0]:
-                    container_ball._v[0][ni][nj][nk] += cross(w_axis,container_ball._pos[0][ni][nj][nk]-container_ball._CM)
+                    container_ball._v[0][ni][nj][nk] += cross(w_axis,container_ball._pos[0][ni][nj][nk]-container_ball._CM) + p_on_r_CM/box_mass
 
     gas.time_elapse(dt)
     container_ball.time_elapse(dt,t)

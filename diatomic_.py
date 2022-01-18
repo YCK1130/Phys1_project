@@ -1,7 +1,8 @@
 from vpython import *
 
 size,  k_bond = 7e-3,  1e5 # These numbers are all made up
-m_o, m_c,m_n,m_h = 1e-2/108*16 ,1e-2/108*12,1e-2/108*14,1e-2/108 
+# m_o, m_c,m_n,m_h = 1e-2/108*16 ,1e-2/108*12,1e-2/108*14,1e-2/108 
+m_o, m_c,m_n,m_h = 1e-2,1e-2,1e-2,1e-2
 mass_dict = {"CO" : (m_o,m_c), "O2":(m_o,m_o), "N2" : (m_n,m_n),"H2":(m_h,m_h)}
 d = 2.5*size
 dt = 1E-16

@@ -248,7 +248,7 @@ class fix_balls():
                 r = self._pos[num][i][j][k]-ref_point
                 p = m*self._v[num][i][j][k]
                 #print(i,j,k,r,p)
-                L_AM += cross(r-r.dot(rotation_axis)*rotation_axis,p-p.dot(rotation_axis)*rotation_axis)
+                L_AM += cross(r-r.dot(rotation_axis.hat)*rotation_axis.hat,p-p.dot(rotation_axis.hat)*rotation_axis.hat)
         return L_AM
 
     def time_elapse(self,dt,t):
