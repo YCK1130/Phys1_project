@@ -2,10 +2,10 @@ from vpython import *
 from diatomic_ import *
 from fix_ball import fix_balls
 N = 2 # 20 molecules
-L = ((24.4E-3)*20)**(1/3.0)/40 # 2L is the length of the cubic container box, the number is made up
-H = 5*L/4
-W = 3*L/4
-nL,nH,nW = 4,5,3
+L = ((24.4E-3)*20)**(1/3.0)/40 *2 # 2L is the length of the cubic container box, the number is made up
+H = 10*L/8
+W = 6*L/8
+nL,nH,nW = 8,10,6
 unit = 2*L/(nL-1)
 m = 1e-2/3 # average mass of O and C
 atom_size = 0.5
@@ -80,5 +80,5 @@ while t<50:
     
     # if(times%50==0):
     container_ball.scene_move()
-    if(times%1000==0):
+    if(times%100==0):
         container_ball.plot_graph(t)
