@@ -1,7 +1,7 @@
 from vpython import *
 
-size,  k_bond = 5e-3/2,  18600.0 # These numbers are all made up
-m_o, m_c,m_n,m_h =16E-3/6E23, 12E-3/6E23, 14E-3/6E23, 1E-3/6E23 
+size,  k_bond = 3e-3,  18600.0 # These numbers are all made up
+m_o, m_c,m_n,m_h = 1e-2/108*16 ,1e-2/108*12,1e-2/108*14,1e-2/108 
 mass_dict = {"CO" : (m_o,m_c), "O2":(m_o,m_o), "N2" : (m_n,m_n),"H2":(m_h,m_h)}
 d = 2.5*size
 dt = 1E-16
@@ -18,7 +18,7 @@ class diatomic_molecule:
     def bond_force_on_A1(self): # return bond force acted on the O atom
         return self.bond.k*(mag(self.bond.axis)-d)*norm(self.bond.axis)
 
-    def time_lapse(self, dt): # by bond's force, calculate a, v and pos of C and O, and bond's pos and axis after dt
+    def time_elapse(self, dt): # by bond's force, calculate a, v and pos of C and O, and bond's pos and axis after dt
         self.A2.a = - self.bond_force_on_A1() / self.A2.m
         self.A1.a = self.bond_force_on_A1() / self.A1.m
         self.A2.v += self.A2.a * dt

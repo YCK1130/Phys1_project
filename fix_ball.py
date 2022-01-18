@@ -10,7 +10,7 @@ S_L = 4
 S_W = 2
 S_H = 2
 
-size = 2e-1
+size = 1e-3
 m = 1e-2 #1e-2
 K = 1e6 #1e6
 a = 1
@@ -71,6 +71,7 @@ class fix_balls():
                     else:
                         side_z.append(sphere(pos = vec(i*self.unit,(j-_L_H/2)*self.unit,k*self.unit), radius = size, color = color.blue))
                     side_z[-1].opos=vec(i*self.unit,(j-_L_H/2)*self.unit,k*self.unit)
+                    side_z[-1].m = m
                     side_z_a.append(vec(0,0,0))
                     side_z_v.append(vec(0,0,0))
                     side_z_pos.append(vec(i*self.unit,(j-_L_H/2)*self.unit,k*self.unit))
@@ -123,6 +124,7 @@ class fix_balls():
                             side_z.append(sphere(pos = vec(-(i+1)*self.unit,(j-_S_H/2)*self.unit,k*self.unit), radius = size, color = color.blue,opacity=0.4))    
                         else:
                             side_z.append(sphere(pos = vec(-(i+1)*self.unit,(j-_S_H/2)*self.unit,k*self.unit), radius = size, color = color.blue))
+                        side_z[-1].m = m
                         side_z[-1].opos=vec(-(i+1)*self.unit,(j-_S_H/2)*self.unit,k*self.unit)
                         side_z_a.append(vec(0,0,0))
                         side_z_v.append(vec(0,0,0))
