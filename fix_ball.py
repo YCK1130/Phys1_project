@@ -168,8 +168,8 @@ class fix_balls():
         '''set init velocity with a small perturbation'''
         perturbation = vec((random()+1e-3)/100,0,0)
         for x in range(self.L_L):
-            self._v[0][x][0][0] = velocity*cross(self._CM-self._pos[0][0][0][0],vec(-1,0,0)) + perturbation
-            self._v[0][x][-1][-1] = velocity*cross(self._CM-self._pos[0][-1][-1][-1],vec(-1,0,0)) - perturbation
+            self._v[0][x][0][0] = velocity*cross(self._CM-self._pos[0][0][0][0],vec(-1,0,0)).hat + perturbation
+            self._v[0][x][-1][-1] = velocity*cross(self._CM-self._pos[0][-1][-1][-1],vec(-1,0,0)).hat - perturbation
         print("perturbation =",perturbation)
 
     def set_init_arr(self):
@@ -282,14 +282,14 @@ class fix_balls():
 
     def count_period(self,_t):
         if(_t<0.01):
-            self.now_I = 10
-            self.prev_I = self.now_I
+            self.now_L = 10
+            self.prev_L = self.now_L
             self.prev_t = 0
-        self.now_I = self.myaxis[1].hat.dot(self.cal_L(self.myaxis[1],self._CM))
-        if self.now_I*self.prev_I<0 and abs(_t-self.prev_t) >= 1e-2 and _t>0.5:
+        self.now_L = self.myaxis[1].hat.dot(self.cal_L(self.myaxis[1],self._CM))
+        if self.now_L*self.prev_L<0 and abs(_t-self.prev_t) >= 1e-2 and _t>0.5:
             print("Period : {:.5f} sec @ {:.5f} , axis: {:}".format(2*(_t-self.prev_t),_t,self.myaxis[1].hat))
             self.prev_t = _t
-        self.prev_I = self.now_I
+        self.prev_L = self.now_L
 
     def scene_move(self):
         for num in range(self.elements_num):
