@@ -6,6 +6,7 @@ g_K = graph(title='kinetic energy', width=450, height=300,align = 'right', backg
                xtitle="<i>t</i>(s)", ytitle="K")
 p_K_gas = gcurve(color = color.red,width = 4,graph=g_K)
 p_K_box = gcurve(color = color.blue,width = 4,graph=g_K)
+p_U_box = gcurve(color = color.yellow,width = 4,graph=g_K)
 N = 10 # 20 molecules
 L = ((24.4E-3)*20)**(1/3.0)/40 *2 # 2L is the length of the cubic container box, the number is made up
 H = 10*L/8
@@ -136,3 +137,4 @@ while t<50:
             K_energy += _atom_.total_K()
         p_K_gas.plot(pos=(t,K_energy))
         p_K_box.plot(pos=(t,container_ball.total_K()))
+        p_U_box.plot(pos=(t,container_ball.total_U()))

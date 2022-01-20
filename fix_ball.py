@@ -10,7 +10,7 @@ S_L = 4
 S_W = 2
 S_H = 2
 
-size = 1e-3
+size = 0.2
 m = 1e-2 #1e-2
 K = 1e6 #1e6
 a = 1
@@ -168,8 +168,13 @@ class fix_balls():
         '''set init velocity with a small perturbation'''
         perturbation = vec((random()+1e-3)/100,0,0)
         for x in range(self.L_L):
-            self._v[0][x][0][0] = velocity*cross(self._CM-self._pos[0][0][0][0],vec(-1,0,0)).hat + perturbation
-            self._v[0][x][-1][-1] = velocity*cross(self._CM-self._pos[0][-1][-1][-1],vec(-1,0,0)).hat - perturbation
+            self._v[0][x][0][0] += velocity*cross(self._CM-self._pos[0][0][0][0],vec(-1,0,0)).hat # + perturbation
+            self._v[0][x][-1][-1] += velocity*cross(self._CM-self._pos[0][-1][-1][-1],vec(-1,0,0)).hat # - perturbation
+        '''add perturbation on smallest axis'''
+        for y in range(self.L_H):
+            self._v[0][0][y][0] += mag(perturbation)*cross(self._CM-self._pos[0][0][0][0],vec(0,1,0)).hat
+            self._v[0][-1][y][-1] += mag(perturbation)*cross(self._CM-self._pos[0][-1][-1][-1],vec(0,1,0)).hat
+        
         print("perturbation =",perturbation)
 
     def set_init_arr(self):
@@ -305,7 +310,25 @@ class fix_balls():
             for (i,j,k) in self.my_index[num]:
                 _K_ += 1/2*self.elements[0][0][0][0].m*mag2(self._v[num][i][j][k])
         return _K_
-
+    def total_U(self):
+        _U = 0
+        for num in range(self.elements_num):
+            for (i, j, k) in self.my_index[num]:
+                self._a[num][i][j][k] = vec(0,0,0)
+                for delta in neighbor:
+                    ni, nj, nk= i+delta[0],j+delta[1],k+delta[2]
+                    if (ni,nj,nk) not in self.my_index[num]:continue
+                    natural_L = mag(self.elements[num][i][j][k].opos-self.elements[num][ni][nj][nk].opos)
+                    _U += 1/2*K*(mag(self._pos[num][i][j][k]-self._pos[num][ni][nj][nk])-natural_L)**2
+        if self.elements_num>1:
+            num1, num2= 0 ,1
+            for (i1, j1, k1) in self.my_index[num1]:
+                for (i2,j2,k2) in self.my_index[num2]:
+                    o_distance = mag(self.elements[num2][i2][j2][k2].opos-self.elements[num1][i1][j1][k1].opos)
+                    if  (o_distance>0.99*self.unit and o_distance <1.01*self.unit) or (o_distance>1.41*self.unit and o_distance <1.415*self.unit):
+                        # print("hi",t)
+                        _U += 1/2*K*(mag(self._pos[num1][i1][j1][k1]-self._pos[num2][i2][j2][k2])-o_distance)**2
+        return _U
 
 if __name__ == '__main__':
     '''1 for rectangle, 2 for T shape'''
@@ -322,7 +345,6 @@ if __name__ == '__main__':
         t+=dt
         times += 1
         T_shape.time_elapse(dt,t)
-        
         T_shape.scene_move()
         if(times%100==0):
             T_shape.plot_graph(t)
